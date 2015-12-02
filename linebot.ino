@@ -13,14 +13,16 @@ ZumoMotors motors;
 Pushbutton button(ZUMO_BUTTON);
 int lastError = 0;
 
+int previousPosition = 2500;
+
 const int MAX_SPEED = 150;
 
 void setup() {
   // put your setup code here, to run once:
 //  pinMode(LED_PIN, OUTPUT);
 //
-//    Serial.begin(9600);
-//  Serial.print("Hello");
+    Serial.begin(9600);
+  Serial.print("Hello");
 
   // Initialize the reflectance sensors module
   reflectanceSensors.init();
@@ -65,24 +67,52 @@ void loop() {
   // individual sensor readings
   int position = reflectanceSensors.readLine(sensors);
 
-  delay(10);
+//  delay(10);
   
-  Serial.begin(9600);
-  Serial.print(position);
-  Serial.println();
+  Serial.println(position);
 
-  float relativeVariable = (position - 2500.0) / 2500.0;
-
-
-  relativeVariable += 1;
-
-  if (relativeVariable < 1) {
-     motors.setRightSpeed(MAX_SPEED * relativeVariable);
-     motors.setLeftSpeed(0); // * -relativeVariable);
+  if (false) { //(position - previousPosition) > 500 || (position - previousPosition) < -500) {
+  Serial.println("AAAAA");
+     motors.setRightSpeed(MAX_SPEED/4);
+     motors.setLeftSpeed(MAX_SPEED/4);
   } else {
-     motors.setRightSpeed(0); // * -relativeVariable);
-     motors.setLeftSpeed(MAX_SPEED * relativeVariable);
+    if (position == 5000) // we went too far left
+    {
+  Serial.println("BBBBB");
+      motors.setRightSpeed(MAX_SPEED);
+      motors.setLeftSpeed(MAX_SPEED);
+    } else if (position == 0) // we went too far right
+    {
+  Serial.println("CCCCC");
+      motors.setRightSpeed(MAX_SPEED);
+      motors.setLeftSpeed(MAX_SPEED);
+    } else {
+      
+      float relativeVariable = (position - 2500.0) / 2500.0;
+      relativeVariable += 1;
+
+      if (relativeVariable == 0) {
+  Serial.println("DDDDD");
+        motors.setRightSpeed(MAX_SPEED);
+        motors.setLeftSpeed(MAX_SPEED);
+      } else {
+        if (relativeVariable < 1) {
+  Serial.println("EEEEE");
+          motors.setRightSpeed(MAX_SPEED * relativeVariable);
+          motors.setLeftSpeed(0); // * -relativeVariable);
+        } else {
+  Serial.println("FFFFF");
+          motors.setRightSpeed(0); // * -relativeVariable);
+          motors.setLeftSpeed(MAX_SPEED * relativeVariable);
+        }
+      }
+    }
   }
+
+
+
+  previousPosition = position;
+
 
 //     motors.setRightSpeed(MAX_SPEED * relativeVariable);
 //     motors.setLeftSpeed(MAX_SPEED * relativeVariable);
